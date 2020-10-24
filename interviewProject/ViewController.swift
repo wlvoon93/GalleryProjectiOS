@@ -10,22 +10,22 @@ import UIKit
 class ViewController: UIViewController {
     
     var topImageHeightValue = 300
+    var initialTopImageHeightValue = 100
     
     let aTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.register(UITableViewCell.self,
             forCellReuseIdentifier: "cell")
         tableView.backgroundColor = UIColor.clear
-        
         tableView.separatorStyle = .none
-
+        
+        
         return tableView
     }()
     
     let topImageView: UIImageView = {
         let imageView = UIImageView(image: #imageLiteral(resourceName: "whale_image"))
         imageView.clipsToBounds = true
-//        imageView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 300)
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
@@ -41,28 +41,34 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
-        //top image
-        
-        view.addSubview(topImageView)
-        activateConstraintsTopImageView()
-        
-        // table
-        aTableView.contentInset = UIEdgeInsets(top: 300, left: 0, bottom: 0, right: 0)
-//        aTableView.backgroundView = topImageView
-        
-        aTableView.dataSource = self
-        aTableView.delegate = self
-        self.view.addSubview(aTableView)
-        activateConstraintsTableView()
         var frame = CGRect.zero
         frame.size.height = .leastNormalMagnitude
         aTableView.tableHeaderView = UIView(frame: frame)
+        aTableView.contentInset = UIEdgeInsets(top: CGFloat(initialTopImageHeightValue), left: 0, bottom: 0, right: 0)
         
+        aTableView.dataSource = self
+        aTableView.delegate = self
+
+        constructHierarchy()
+        activateConstraints()
+        
+        let pop = GalleryViewController()
+        self.view.addSubview(pop.view)
+    }
+    
+    func constructHierarchy(){
+        view.addSubview(topImageView)
+        self.view.addSubview(aTableView)
         self.view.bringSubviewToFront(topImageView)
-        
         view.addSubview(galleryButton)
-        activateConstraintsGalleryButton()
         self.view.bringSubviewToFront(galleryButton)
+    }
+    
+    func activateConstraints(){
+        
+        activateConstraintsTableView()
+        activateConstraintsTopImageView()
+        activateConstraintsGalleryButton()
     }
 }
 
@@ -165,14 +171,15 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let y = 300 - (scrollView.contentOffset.y + 300)
+        let y = initialTopImageHeightValue - (Int(scrollView.contentOffset.y) + initialTopImageHeightValue)
         let height = min(max(y, 60), 400)
         
 //        topImageView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: height)
+        print(height)
         
         for constraint in self.topImageView.constraints {
             if constraint.identifier == "imageheight" {
-               constraint.constant = height
+                constraint.constant = CGFloat(height)
             }
         }
         self.view.layoutIfNeeded()

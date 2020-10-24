@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6652DDFC2543DD1F006AEA93 /* GalleryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6652DDFB2543DD1E006AEA93 /* GalleryViewController.swift */; };
+		6667973425445F13004AF0CE /* PageCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6667973325445F13004AF0CE /* PageCell.swift */; };
 		66A0C7A9253F2F6C0023ACC7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A0C7A8253F2F6C0023ACC7 /* AppDelegate.swift */; };
 		66A0C7AB253F2F6C0023ACC7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A0C7AA253F2F6C0023ACC7 /* SceneDelegate.swift */; };
 		66A0C7AD253F2F6C0023ACC7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66A0C7AC253F2F6C0023ACC7 /* ViewController.swift */; };
@@ -37,6 +39,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6652DDFB2543DD1E006AEA93 /* GalleryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GalleryViewController.swift; sourceTree = "<group>"; };
+		6667973325445F13004AF0CE /* PageCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageCell.swift; sourceTree = "<group>"; };
 		66A0C7A5253F2F6C0023ACC7 /* interviewProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = interviewProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		66A0C7A8253F2F6C0023ACC7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		66A0C7AA253F2F6C0023ACC7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -80,6 +84,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6667973825445F91004AF0CE /* Gallery */ = {
+			isa = PBXGroup;
+			children = (
+				6652DDFB2543DD1E006AEA93 /* GalleryViewController.swift */,
+				6667973325445F13004AF0CE /* PageCell.swift */,
+			);
+			path = Gallery;
+			sourceTree = "<group>";
+		};
 		66A0C79C253F2F6B0023ACC7 = {
 			isa = PBXGroup;
 			children = (
@@ -103,6 +116,7 @@
 		66A0C7A7253F2F6C0023ACC7 /* interviewProject */ = {
 			isa = PBXGroup;
 			children = (
+				6667973825445F91004AF0CE /* Gallery */,
 				66A0C7A8253F2F6C0023ACC7 /* AppDelegate.swift */,
 				66A0C7AA253F2F6C0023ACC7 /* SceneDelegate.swift */,
 				66A0C7AC253F2F6C0023ACC7 /* ViewController.swift */,
@@ -269,6 +283,8 @@
 				66A0C7B3253F2F6C0023ACC7 /* interviewProject.xcdatamodeld in Sources */,
 				66A0C7A9253F2F6C0023ACC7 /* AppDelegate.swift in Sources */,
 				66A0C7AB253F2F6C0023ACC7 /* SceneDelegate.swift in Sources */,
+				6652DDFC2543DD1F006AEA93 /* GalleryViewController.swift in Sources */,
+				6667973425445F13004AF0CE /* PageCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
