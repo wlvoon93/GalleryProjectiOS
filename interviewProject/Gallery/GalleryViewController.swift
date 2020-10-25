@@ -16,6 +16,8 @@ class GalleryViewController: UIViewController {
     var secondPage: UICollectionViewCell?
     let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
     var imagesDetails:[Image]?
+    
+    var indexPaths: [IndexPath] = Array<IndexPath>()
 
     let exitButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -26,12 +28,14 @@ class GalleryViewController: UIViewController {
     let albumOneButton: UIButton = {
         let button = UIButton(type: .custom)
         button.backgroundColor = UIColor.green
+        button.setTitle("封面", for: .normal)
         return button
     }()
     
     let albumTwoButton: UIButton = {
         let button = UIButton(type: .custom)
         button.backgroundColor = UIColor.red
+        button.setTitle("其他", for: .normal)
         return button
     }()
     
@@ -63,21 +67,54 @@ class GalleryViewController: UIViewController {
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: self.view.frame.width, height: self.view.frame.height)
         
+        
         pagingCollectionView = UICollectionView(frame: self.view.frame, collectionViewLayout: layout)
         pagingCollectionView?.register(PageCell.self, forCellWithReuseIdentifier: "MyCell")
         pagingCollectionView?.backgroundColor = UIColor.white
 
         pagingCollectionView?.dataSource = self
         pagingCollectionView?.delegate = self
-
         pagingCollectionView?.isPagingEnabled = true
         
-
         constructHierarchy()
         activateConstraints()
-        
+        wireController()
         
     }
+    private lazy var pageControl: UIPageControl = {
+        let pc = UIPageControl()
+        pc.currentPage = 0
+        pc.numberOfPages = 2
+        pc.currentPageIndicatorTintColor = .blue
+        pc.pageIndicatorTintColor = UIColor(red: 249/255, green: 207/255, blue: 224/255, alpha: 1)
+        return pc
+    }()
+    
+    func wireController(){
+        albumOneButton.addTarget(self, action: #selector(gotoPageOne), for: .touchUpInside)
+        albumTwoButton.addTarget(self, action: #selector(gotoPageTwo), for: .touchUpInside)
+    }
+    
+    @objc private func gotoPageOne(){
+//        let indexPath = IndexPath(item: 0, section: 0)
+//        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        
+        let nextIndex = min(pageControl.currentPage - 1, 2 - 1)
+        let indexPath = IndexPath(item: nextIndex, section: 0)
+        pageControl.currentPage = nextIndex
+        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+    }
+    
+    @objc private func gotoPageTwo(){
+        
+//        let indexPath = indexPaths[1]
+//        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        let nextIndex = min(pageControl.currentPage + 1, 2 - 1)
+        let indexPath = IndexPath(item: nextIndex, section: 0)
+        pageControl.currentPage = nextIndex
+        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+    }
+    
     
     override func viewDidAppear(_ animated: Bool) {
         _ = networkHelper.getImages().done { (images) in
@@ -91,6 +128,9 @@ class GalleryViewController: UIViewController {
         contentView.addSubview(exitButton)
         contentView.addSubview(albumButtonsView)
         contentView.addSubview(pagingCollectionView ?? UICollectionView())
+        
+        albumButtonsView.addSubview(albumOneButton)
+        albumButtonsView.addSubview(albumTwoButton)
     }
     
     func activateConstraints(){
@@ -99,6 +139,9 @@ class GalleryViewController: UIViewController {
         activateConstraintsExitButton()
         activateConstraintsAlbumButtonsView()
         activateConstraintsPagingCollectionView()
+        
+        activateConstraintsAlbumOneButton()
+        activateConstraintsAlbumTwoButton()
     }
 }
 
@@ -135,12 +178,36 @@ extension GalleryViewController{
         let centerX = albumButtonsView.centerXAnchor
             .constraint(equalTo: contentView.centerXAnchor)
         let top = albumButtonsView.topAnchor
-            .constraint(equalTo: self.view.topAnchor, constant: 20)
-        let height = albumButtonsView.heightAnchor
-            .constraint(equalToConstant: 50)
-        let width = albumButtonsView.widthAnchor.constraint(equalToConstant: 100)
+            .constraint(equalTo: self.view.topAnchor, constant: 40)
+        let bottom = albumButtonsView.bottomAnchor
+            .constraint(equalTo: albumOneButton.bottomAnchor)
+
         NSLayoutConstraint.activate(
-            [centerX, height, top, width])
+            [centerX, top, bottom])
+    }
+    
+    func activateConstraintsAlbumOneButton() {
+        albumOneButton.translatesAutoresizingMaskIntoConstraints = false
+        let leading = albumOneButton.leadingAnchor
+            .constraint(equalTo: self.albumButtonsView.leadingAnchor)
+        let top = albumOneButton.topAnchor
+            .constraint(equalTo: self.albumButtonsView.topAnchor)
+        
+        NSLayoutConstraint.activate(
+            [leading, top])
+    }
+    
+    func activateConstraintsAlbumTwoButton() {
+        albumTwoButton.translatesAutoresizingMaskIntoConstraints = false
+        let leading = albumTwoButton.leadingAnchor
+            .constraint(equalTo: albumOneButton.trailingAnchor, constant: 30)
+        let trailing = albumTwoButton.trailingAnchor
+            .constraint(equalTo: self.albumButtonsView.trailingAnchor)
+        let top = albumTwoButton.topAnchor
+            .constraint(equalTo: self.albumButtonsView.topAnchor)
+        
+        NSLayoutConstraint.activate(
+            [leading, trailing, top])
     }
     
     func activateConstraintsPagingCollectionView(){
@@ -201,6 +268,8 @@ extension GalleryViewController: UICollectionViewDataSource {
             }
         }
         
+        indexPaths.append(indexPath)
+        
         return myCell
     }
 
@@ -210,14 +279,13 @@ extension GalleryViewController: UICollectionViewDataSource {
         return 0.0
     }
 
-
 }
 extension GalleryViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("User tapped on item \(indexPath.row)")
     }
-
+    
 }
 
 extension GalleryViewController: UICollectionViewDelegateFlowLayout {
@@ -225,6 +293,7 @@ extension GalleryViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
     }
+    
 }
 
 

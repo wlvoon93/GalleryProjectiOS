@@ -32,9 +32,6 @@ class PageCell: UICollectionViewCell {
 
         galleryCollectionView?.isPagingEnabled = true
 
-        if #available(iOS 11.0, *) {
-            galleryCollectionView?.contentInsetAdjustmentBehavior = .never
-        }
 
         self.addSubview(galleryCollectionView ?? UICollectionView())
 
