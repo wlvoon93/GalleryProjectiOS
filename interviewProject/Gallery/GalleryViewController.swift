@@ -10,8 +10,12 @@ import UIKit
 
 class GalleryViewController: UIViewController {
     
+    let numberOfPages = 2
     var pagingCollectionView:UICollectionView?
+    var firstPage: UICollectionViewCell?
+    var secondPage: UICollectionViewCell?
     let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
+    var imagesDetails:[Image]?
 
     let exitButton: UIButton = {
         let button = UIButton(type: .custom)
@@ -46,6 +50,8 @@ class GalleryViewController: UIViewController {
         v.layer.cornerRadius = 24
         return v
     }()
+    
+    let networkHelper = NetworkHelper()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -65,9 +71,19 @@ class GalleryViewController: UIViewController {
         pagingCollectionView?.delegate = self
 
         pagingCollectionView?.isPagingEnabled = true
+        
 
         constructHierarchy()
         activateConstraints()
+        
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        _ = networkHelper.getImages().done { (images) in
+            self.imagesDetails = images
+            self.pagingCollectionView?.reloadData()
+        }
     }
     
     func constructHierarchy(){
@@ -163,13 +179,28 @@ extension UIColor {
 
 extension GalleryViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 2 // How many cells to display
+        return numberOfPages // How many cells to display
     }
 
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let myCell = collectionView.dequeueReusableCell(withReuseIdentifier: "MyCell", for: indexPath)
-//        myCell.backgroundColor = UIColor.blue
+        let pageCell:PageCell = myCell as! PageCell
+        
+        if self.imagesDetails != nil {
+            if self.imagesDetails!.count > 0 {
+                let splitArray = self.imagesDetails?.split()
+                var halfArray:[Image]
+                
+                if indexPath.row == 0 {
+                    halfArray = splitArray!.left
+                }else{
+                    halfArray = splitArray!.right
+                }
+                pageCell.setImageDetails(imageDetails: halfArray)
+            }
+        }
+        
         return myCell
     }
 
@@ -193,5 +224,16 @@ extension GalleryViewController: UICollectionViewDelegateFlowLayout {
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+}
+
+
+extension Array {
+    func split() -> (left: [Element], right: [Element]) {
+        let ct = self.count
+        let half = ct / 2
+        let leftSplit = self[0 ..< half]
+        let rightSplit = self[half ..< ct]
+        return (left: Array(leftSplit), right: Array(rightSplit))
     }
 }
