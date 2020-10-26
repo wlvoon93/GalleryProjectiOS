@@ -9,16 +9,16 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    var topImageHeightValue = 300
-    var initialTopImageHeightValue = 100
+    var topImageHeightValue = 400
+    var initialTopImageHeightValue = 400
+    
     
     let aTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.register(UITableViewCell.self,
             forCellReuseIdentifier: "cell")
-        tableView.backgroundColor = UIColor.clear
         tableView.separatorStyle = .none
-        
+        tableView.backgroundColor = .gray
         
         return tableView
     }()
@@ -29,6 +29,12 @@ class ViewController: UIViewController {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         return imageView
+    }()
+    
+    let tableBackgroundView: UIView = {
+        let v = UIView()
+        v.backgroundColor = .gray
+        return v
     }()
     
     let galleryButton: UIButton = {
@@ -43,8 +49,10 @@ class ViewController: UIViewController {
         
         var frame = CGRect.zero
         frame.size.height = .leastNormalMagnitude
-        aTableView.tableHeaderView = UIView(frame: frame)
+//        aTableView.tableHeaderView = UIView(frame: frame)
         aTableView.contentInset = UIEdgeInsets(top: CGFloat(initialTopImageHeightValue), left: 0, bottom: 0, right: 0)
+        aTableView.backgroundView = tableBackgroundView
+        aTableView.separatorColor = .clear
         
         aTableView.dataSource = self
         aTableView.delegate = self
@@ -52,8 +60,15 @@ class ViewController: UIViewController {
         constructHierarchy()
         activateConstraints()
         
+        galleryButton.addTarget(self, action: #selector(self.showGallery), for: .touchUpInside) 
+    }
+    
+    @objc func showGallery() {
         let pop = GalleryViewController()
-        self.view.addSubview(pop.view)
+        pop.homeViewController = self
+        pop.modalPresentationStyle = .fullScreen
+//        self.view.addSubview(pop.view)
+        self.present(pop, animated: true, completion: nil)
     }
     
     func constructHierarchy(){
@@ -94,7 +109,7 @@ extension ViewController{
         let trailing = topImageView.trailingAnchor
             .constraint(equalTo: self.view.trailingAnchor)
         let top = topImageView.topAnchor
-            .constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor)
+            .constraint(equalTo: self.view.topAnchor)
         let topImageHeight = topImageView.heightAnchor.constraint(equalToConstant: CGFloat(topImageHeightValue))
         topImageHeight.identifier = "imageheight"
         NSLayoutConstraint.activate(
@@ -120,14 +135,6 @@ extension ViewController{
 }
 
 extension ViewController: UITableViewDataSource, UITableViewDelegate {
-//    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-//
-//        return 0.01
-//    }
-
-//    func numberOfSections(in tableView: UITableView) -> Int {
-//        return 1
-//    }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
@@ -139,26 +146,12 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
         var cell: UITableViewCell
         
         cell = tableViewCell()
-        
-
-//        if indexPath.row == 0 || indexPath.row == 3 {
-//            cell = ProfileHeaderCellTableViewCell()
-////        cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.cell.rawValue)!
-////        cell.textLabel?.text = content(forIndexPath: indexPath)
-//            let headerCell:ProfileHeaderCellTableViewCell = cell as! ProfileHeaderCellTableViewCell
-//            headerCell.myLabel.text = content(forIndexPath: indexPath)
-//            styleCell(forIndexPath: indexPath, cell: cell)
-//        } else {
-//            cell = ProfileBodyCellTableViewCell()
-//
-//            let bodyCell:ProfileBodyCellTableViewCell = cell as! ProfileBodyCellTableViewCell
-////            bodyCell.cellLabelString = content(forIndexPath: indexPath)
-//            bodyCell.myLabel.text = content(forIndexPath: indexPath)
-////            cell.textLabel?.text = content(forIndexPath: indexPath)
-//            styleCell(forIndexPath: indexPath, cell: cell)
-//        }
 
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 200
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -172,10 +165,7 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let y = initialTopImageHeightValue - (Int(scrollView.contentOffset.y) + initialTopImageHeightValue)
-        let height = min(max(y, 60), 400)
-        
-//        topImageView.frame = CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: height)
-        print(height)
+        let height = min(max(y, 60), 350)
         
         for constraint in self.topImageView.constraints {
             if constraint.identifier == "imageheight" {
@@ -183,12 +173,6 @@ extension ViewController: UITableViewDataSource, UITableViewDelegate {
             }
         }
         self.view.layoutIfNeeded()
-        
-        
-//        topImageHeight = topImageView.heightAnchor.constraint(equalToConstant: height)
-//        NSLayoutConstraint.activate(
-//            [topImageHeight])}
-//        self.view.layoutIfNeeded()
     }
     
 }

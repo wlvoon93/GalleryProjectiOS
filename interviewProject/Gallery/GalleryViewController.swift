@@ -16,34 +16,53 @@ class GalleryViewController: UIViewController {
     var secondPage: UICollectionViewCell?
     let layout: UICollectionViewFlowLayout = UICollectionViewFlowLayout()
     var imagesDetails:[Image]?
+    var homeViewController: ViewController?
+    
+    var indicatorStayLeft: NSLayoutConstraint?
+    var indicatorStayRight: NSLayoutConstraint?
+    
+    var pageIndicatorConstraint: CGFloat?
     
     var indexPaths: [IndexPath] = Array<IndexPath>()
 
     let exitButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.backgroundColor = UIColor.yellow
+        button.backgroundColor = UIColor.clear
+        button.setBackgroundImage(#imageLiteral(resourceName: "cross-img"), for: .normal)
         return button
     }()
     
-    let albumOneButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.backgroundColor = UIColor.green
-        button.setTitle("封面", for: .normal)
-        return button
-    }()
-    
-    let albumTwoButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.backgroundColor = UIColor.red
-        button.setTitle("其他", for: .normal)
-        return button
-    }()
-    
-    let albumButtonsView: UIView = {
+    let exitButtonBackgroundView: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
-        v.backgroundColor = UIColor.blue
-        v.layer.cornerRadius = 24
+        v.backgroundColor = UIColor.lightGray
+        v.layer.cornerRadius = 15
+        return v
+    }()
+    
+    var bigButtonFontSize = 20
+    var smallButtonFontSize = 15
+    
+    let albumOneLabel: UIButton = {
+        let button = UIButton(type: .custom)
+        button.backgroundColor = UIColor.clear
+        button.setTitle("封面", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(20))
+        return button
+    }()
+    
+    let albumTwoLabel: UIButton = {
+        let button = UIButton(type: .custom)
+        button.backgroundColor = UIColor.clear
+        button.setTitle("其他", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(15))
+        return button
+    }()
+    
+    let albumLabelsView: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = UIColor.clear
         return v
     }()
     
@@ -51,7 +70,13 @@ class GalleryViewController: UIViewController {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
         v.backgroundColor = UIColor(rgb: 0x333333)
-        v.layer.cornerRadius = 24
+        return v
+    }()
+    
+    let pagingIndicator: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = UIColor.yellow
         return v
     }()
     
@@ -80,7 +105,51 @@ class GalleryViewController: UIViewController {
         activateConstraints()
         wireController()
         
+        animateIn()
     }
+    
+    func movePageIndicator(index:Int){
+        
+        if index == 0 {
+            indicatorStayLeft?.isActive = true
+            indicatorStayRight?.isActive = false
+            self.albumOneLabel.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(bigButtonFontSize))
+            self.albumTwoLabel.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(smallButtonFontSize))
+        }else{
+            indicatorStayLeft?.isActive = false
+            indicatorStayRight?.isActive = true
+            self.albumTwoLabel.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(bigButtonFontSize))
+            self.albumOneLabel.titleLabel?.font = UIFont.systemFont(ofSize: CGFloat(smallButtonFontSize))
+        }
+        UIView.animate(withDuration: 1) {
+            self.view.layoutIfNeeded()
+        }
+        
+    }
+    
+    @objc fileprivate func animateOut(){
+        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
+            self.view.transform = CGAffineTransform(translationX: 0, y: UIScreen.main.bounds.height)
+        } completion: { (complete) in
+            if complete {
+//                self.view.removeFromSuperview()
+//                self.dismiss(animated: false, completion: nil)
+                self.homeViewController?.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
+    
+    @objc fileprivate func animateIn(){
+        
+        self.view.transform = CGAffineTransform(translationX: 0, y: -UIScreen.main.bounds.height)
+        self.view.alpha = 0
+        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
+            self.view.transform = .identity
+            self.view.alpha = 1
+        }
+    }
+    
+    
     private lazy var pageControl: UIPageControl = {
         let pc = UIPageControl()
         pc.currentPage = 0
@@ -91,30 +160,9 @@ class GalleryViewController: UIViewController {
     }()
     
     func wireController(){
-        albumOneButton.addTarget(self, action: #selector(gotoPageOne), for: .touchUpInside)
-        albumTwoButton.addTarget(self, action: #selector(gotoPageTwo), for: .touchUpInside)
-    }
-    
-    @objc private func gotoPageOne(){
-//        let indexPath = IndexPath(item: 0, section: 0)
-//        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
         
-        let nextIndex = min(pageControl.currentPage - 1, 2 - 1)
-        let indexPath = IndexPath(item: nextIndex, section: 0)
-        pageControl.currentPage = nextIndex
-        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        exitButton.addTarget(self, action: #selector(animateOut), for: .touchUpInside)
     }
-    
-    @objc private func gotoPageTwo(){
-        
-//        let indexPath = indexPaths[1]
-//        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        let nextIndex = min(pageControl.currentPage + 1, 2 - 1)
-        let indexPath = IndexPath(item: nextIndex, section: 0)
-        pageControl.currentPage = nextIndex
-        pagingCollectionView?.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-    }
-    
     
     override func viewDidAppear(_ animated: Bool) {
         _ = networkHelper.getImages().done { (images) in
@@ -125,23 +173,30 @@ class GalleryViewController: UIViewController {
     
     func constructHierarchy(){
         view.addSubview(contentView)
-        contentView.addSubview(exitButton)
-        contentView.addSubview(albumButtonsView)
+        contentView.addSubview(exitButtonBackgroundView)
+        exitButtonBackgroundView.addSubview(exitButton)
+        
+        contentView.addSubview(albumLabelsView)
         contentView.addSubview(pagingCollectionView ?? UICollectionView())
         
-        albumButtonsView.addSubview(albumOneButton)
-        albumButtonsView.addSubview(albumTwoButton)
+        albumLabelsView.addSubview(albumOneLabel)
+        albumLabelsView.addSubview(albumTwoLabel)
+        
+        contentView.addSubview(pagingIndicator)
     }
     
     func activateConstraints(){
         
         activateConstraintsContentView()
+        activateConstraintsExitButtonBackgroundView()
         activateConstraintsExitButton()
-        activateConstraintsAlbumButtonsView()
+        activateConstraintsAlbumLabelsView()
         activateConstraintsPagingCollectionView()
         
-        activateConstraintsAlbumOneButton()
-        activateConstraintsAlbumTwoButton()
+        activateConstraintsAlbumOneLabel()
+        activateConstraintsAlbumTwoLabel()
+        
+        activateConstraintsPagingIndicator()
     }
 }
 
@@ -162,52 +217,54 @@ extension GalleryViewController{
     
     func activateConstraintsExitButton(){
         exitButton.translatesAutoresizingMaskIntoConstraints = false
-        let leading = exitButton.leadingAnchor
-            .constraint(equalTo: self.view.leadingAnchor, constant: 20)
-        let top = exitButton.topAnchor
-            .constraint(equalTo: self.view.topAnchor, constant: 20)
+        let centerX = exitButton.centerXAnchor
+            .constraint(equalTo: self.exitButtonBackgroundView.centerXAnchor)
+        let centerY = exitButton.centerYAnchor
+            .constraint(equalTo: self.exitButtonBackgroundView.centerYAnchor)
         let height = exitButton.heightAnchor
-            .constraint(equalToConstant: 30)
-        let width = contentView.widthAnchor.constraint(equalToConstant: height.constant)
+            .constraint(equalToConstant: 20)
+        let width = exitButton.widthAnchor.constraint(equalToConstant: 20)
         NSLayoutConstraint.activate(
-            [leading, height, top, width])
+            [centerX, height, centerY, width])
     }
     
-    func activateConstraintsAlbumButtonsView(){
-        albumButtonsView.translatesAutoresizingMaskIntoConstraints = false
-        let centerX = albumButtonsView.centerXAnchor
+    func activateConstraintsAlbumLabelsView(){
+        albumLabelsView.translatesAutoresizingMaskIntoConstraints = false
+        let centerX = albumLabelsView.centerXAnchor
             .constraint(equalTo: contentView.centerXAnchor)
-        let top = albumButtonsView.topAnchor
+        let top = albumLabelsView.topAnchor
             .constraint(equalTo: self.view.topAnchor, constant: 40)
-        let bottom = albumButtonsView.bottomAnchor
-            .constraint(equalTo: albumOneButton.bottomAnchor)
+        let bottom = albumLabelsView.bottomAnchor
+            .constraint(equalTo: albumOneLabel.bottomAnchor)
 
         NSLayoutConstraint.activate(
             [centerX, top, bottom])
     }
     
-    func activateConstraintsAlbumOneButton() {
-        albumOneButton.translatesAutoresizingMaskIntoConstraints = false
-        let leading = albumOneButton.leadingAnchor
-            .constraint(equalTo: self.albumButtonsView.leadingAnchor)
-        let top = albumOneButton.topAnchor
-            .constraint(equalTo: self.albumButtonsView.topAnchor)
+    func activateConstraintsAlbumOneLabel() {
+        albumOneLabel.translatesAutoresizingMaskIntoConstraints = false
+        let leading = albumOneLabel.leadingAnchor
+            .constraint(equalTo: self.albumLabelsView.leadingAnchor)
+        let top = albumOneLabel.topAnchor
+            .constraint(equalTo: self.albumLabelsView.topAnchor)
+        let height = albumOneLabel.heightAnchor.constraint(equalToConstant: 30)
         
         NSLayoutConstraint.activate(
-            [leading, top])
+            [leading, top, height])
     }
     
-    func activateConstraintsAlbumTwoButton() {
-        albumTwoButton.translatesAutoresizingMaskIntoConstraints = false
-        let leading = albumTwoButton.leadingAnchor
-            .constraint(equalTo: albumOneButton.trailingAnchor, constant: 30)
-        let trailing = albumTwoButton.trailingAnchor
-            .constraint(equalTo: self.albumButtonsView.trailingAnchor)
-        let top = albumTwoButton.topAnchor
-            .constraint(equalTo: self.albumButtonsView.topAnchor)
+    func activateConstraintsAlbumTwoLabel() {
+        albumTwoLabel.translatesAutoresizingMaskIntoConstraints = false
+        let leading = albumTwoLabel.leadingAnchor
+            .constraint(equalTo: albumOneLabel.trailingAnchor, constant: 30)
+        let trailing = albumTwoLabel.trailingAnchor
+            .constraint(equalTo: self.albumLabelsView.trailingAnchor)
+        let top = albumTwoLabel.topAnchor
+            .constraint(equalTo: self.albumLabelsView.topAnchor)
+        let height = albumTwoLabel.heightAnchor.constraint(equalToConstant: 30)
         
         NSLayoutConstraint.activate(
-            [leading, trailing, top])
+            [leading, trailing, top, height])
     }
     
     func activateConstraintsPagingCollectionView(){
@@ -217,11 +274,43 @@ extension GalleryViewController{
         let trailing = pagingCollectionView!.trailingAnchor
             .constraint(equalTo: self.view.trailingAnchor)
         let top = pagingCollectionView!.topAnchor
-            .constraint(equalTo: self.albumButtonsView.bottomAnchor, constant: 10)
+            .constraint(equalTo: self.albumLabelsView.bottomAnchor, constant: 10)
         let bottom = pagingCollectionView!.bottomAnchor
             .constraint(equalTo: self.view.bottomAnchor)
         NSLayoutConstraint.activate(
             [leading, trailing, top, bottom])
+    }
+    
+    func activateConstraintsPagingIndicator(){
+        pagingIndicator.translatesAutoresizingMaskIntoConstraints = false
+        let centerX = pagingIndicator.centerXAnchor
+            .constraint(equalTo: self.albumOneLabel.centerXAnchor)
+        self.indicatorStayLeft = centerX
+        let centerY = pagingIndicator.centerXAnchor
+            .constraint(equalTo: self.albumTwoLabel.centerXAnchor)
+        self.indicatorStayRight = centerY
+        pageIndicatorConstraint = centerX.constant
+        let width = pagingIndicator.widthAnchor
+            .constraint(equalTo: albumOneLabel.widthAnchor)
+        let top = pagingIndicator.topAnchor
+            .constraint(equalTo: self.albumLabelsView.bottomAnchor)
+        let height = pagingIndicator.heightAnchor
+            .constraint(equalToConstant: 3)
+        NSLayoutConstraint.activate(
+            [centerX, width, top, height])
+    }
+    
+    func activateConstraintsExitButtonBackgroundView(){
+        exitButtonBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        let leading = exitButtonBackgroundView.leadingAnchor
+            .constraint(equalTo: self.view.leadingAnchor, constant: 20)
+        let top = exitButtonBackgroundView.topAnchor
+            .constraint(equalTo: self.view.topAnchor, constant: 40)
+        let height = exitButtonBackgroundView.heightAnchor
+            .constraint(equalToConstant: 30)
+        let width = exitButtonBackgroundView.widthAnchor.constraint(equalToConstant: 30)
+        NSLayoutConstraint.activate(
+            [leading, height, top, width])
     }
     
 }
@@ -284,6 +373,18 @@ extension GalleryViewController: UICollectionViewDelegate {
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         print("User tapped on item \(indexPath.row)")
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let x = targetContentOffset.pointee.x
+        
+        pageControl.currentPage = Int(x / view.frame.width)
+        
+        print("current page \(pageControl.currentPage)")
+        
+   
+        movePageIndicator(index: pageControl.currentPage)
+
     }
     
 }
