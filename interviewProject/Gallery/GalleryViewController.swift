@@ -128,25 +128,28 @@ class GalleryViewController: UIViewController {
     }
     
     @objc fileprivate func animateOut(){
-        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
-            self.view.transform = CGAffineTransform(translationX: 0, y: UIScreen.main.bounds.height)
-        } completion: { (complete) in
-            if complete {
-//                self.view.removeFromSuperview()
-//                self.dismiss(animated: false, completion: nil)
-                self.homeViewController?.dismiss(animated: true, completion: nil)
-            }
-        }
+//        self.homeViewController?.dismiss(animated: true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
+//        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
+//            self.view.transform = CGAffineTransform(translationX: 0, y: UIScreen.main.bounds.height)
+//        } completion: { (complete) in
+//            if complete {
+////                self.view.removeFromSuperview()
+////                self.dismiss(animated: false, completion: nil)
+//                
+//
+//            }
+//        }
     }
     
     @objc fileprivate func animateIn(){
         
-        self.view.transform = CGAffineTransform(translationX: 0, y: -UIScreen.main.bounds.height)
-        self.view.alpha = 0
-        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
-            self.view.transform = .identity
-            self.view.alpha = 1
-        }
+//        self.view.transform = CGAffineTransform(translationX: 0, y: -UIScreen.main.bounds.height)
+//        self.view.alpha = 0
+//        UIView.animate(withDuration: 1, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 1, options: .curveEaseIn) {
+//            self.view.transform = .identity
+//            self.view.alpha = 1
+//        }
     }
     
     

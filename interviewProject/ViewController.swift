@@ -7,22 +7,32 @@
 
 import UIKit
 
-class ViewController: UIViewController {
-    
-    var topImageHeightValue = 400
-    var initialTopImageHeightValue = 400
-    
-    
-    let aTableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .grouped)
-        tableView.register(UITableViewCell.self,
-            forCellReuseIdentifier: "cell")
-        tableView.separatorStyle = .none
-        tableView.backgroundColor = .gray
-        
-        return tableView
+class ViewController: UIViewController, UIScrollViewDelegate {
+
+    let scrollView: UIScrollView = {
+        let view = UIScrollView()
+        view.backgroundColor = .gray
+
+        return view
     }()
     
+    let imageContainer = UIView()
+    let textContainer: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+
+        return view
+    }()
+
+    let textContent: UIView = {
+        let view = UIView()
+        view.backgroundColor = .blue
+
+        return view
+    }()
+
+//    private let infoText = UILabel()
+
     let topImageView: UIImageView = {
         let imageView = UIImageView(image: #imageLiteral(resourceName: "whale_image"))
         imageView.clipsToBounds = true
@@ -30,13 +40,7 @@ class ViewController: UIViewController {
         imageView.clipsToBounds = true
         return imageView
     }()
-    
-    let tableBackgroundView: UIView = {
-        let v = UIView()
-        v.backgroundColor = .gray
-        return v
-    }()
-    
+
     let galleryButton: UIButton = {
         let button = UIButton(type: .custom)
         button.backgroundColor = UIColor.yellow
@@ -46,23 +50,25 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
+
         var frame = CGRect.zero
         frame.size.height = .leastNormalMagnitude
-//        aTableView.tableHeaderView = UIView(frame: frame)
-        aTableView.contentInset = UIEdgeInsets(top: CGFloat(initialTopImageHeightValue), left: 0, bottom: 0, right: 0)
-        aTableView.backgroundView = tableBackgroundView
-        aTableView.separatorColor = .clear
-        
-        aTableView.dataSource = self
-        aTableView.delegate = self
+//
+//        infoText.textColor = .black
+//        infoText.numberOfLines = 0
+//        let text =  """
+//                    Lorem ipsum dolor sit amet, in alia adhuc aperiri nam. Movet scripta tractatos cu eum, sale commodo meliore ea eam, per commodo atomorum ea. Unum graeci iriure nec an, ea sit habeo movet electram. Id eius assum persius pro, id cum falli accusam. Has eu fierent partiendo, doming expetenda interesset cu mel, tempor possit vocent in nam. Iusto tollit ad duo, est at vidit vivendo liberavisse, vide munere nonumy sed ex.
+//
+//                    Quod possit expetendis id qui, consequat vituperata ad eam. Per cu elit latine vivendum. Ei sit nullam aliquam, an ferri epicuri quo. Ex vim tibique accumsan erroribus. In per libris verear adipiscing. Purto aliquid lobortis ea quo, ea utinam oportere qui.
+//                    """
+//        infoText.text = text + text + text
 
         constructHierarchy()
         activateConstraints()
-        
-        galleryButton.addTarget(self, action: #selector(self.showGallery), for: .touchUpInside) 
+
+        galleryButton.addTarget(self, action: #selector(self.showGallery), for: .touchUpInside)
     }
-    
+
     @objc func showGallery() {
         let pop = GalleryViewController()
         pop.homeViewController = self
@@ -70,109 +76,142 @@ class ViewController: UIViewController {
 //        self.view.addSubview(pop.view)
         self.present(pop, animated: true, completion: nil)
     }
-    
-    func constructHierarchy(){
-        view.addSubview(topImageView)
-        self.view.addSubview(aTableView)
-        self.view.bringSubviewToFront(topImageView)
-        view.addSubview(galleryButton)
-        self.view.bringSubviewToFront(galleryButton)
+
+    func constructHierarchy() {
+
+        view.addSubview(scrollView)
+        scrollView.addSubview(imageContainer)
+        scrollView.addSubview(textContainer)
+        scrollView.addSubview(topImageView)
+
+        scrollView.addSubview(galleryButton)
+
+        textContainer.addSubview(textContent)
+
+//        view.addSubview(topImageView)
+//        self.view.bringSubviewToFront(topImageView)
+//        view.addSubview(galleryButton)
+//        self.view.bringSubviewToFront(galleryButton)
     }
-    
-    func activateConstraints(){
-        
-        activateConstraintsTableView()
+
+    func activateConstraints() {
+        activateConstraintScrollView()
         activateConstraintsTopImageView()
         activateConstraintsGalleryButton()
+        activateConstraintImageContainer()
+
+        activateConstraintTextContainer()
+        activateConstraintTextContent()
     }
 }
 
 // layout
-extension ViewController{
-    func activateConstraintsTableView() {
-        aTableView.translatesAutoresizingMaskIntoConstraints = false
-        let leading = aTableView.leadingAnchor
+extension ViewController {
+
+    func activateConstraintScrollView() {
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        let leading = scrollView.leadingAnchor
             .constraint(equalTo: self.view.leadingAnchor)
-        let trailing = aTableView.trailingAnchor
+        let trailing = scrollView.trailingAnchor
             .constraint(equalTo: self.view.trailingAnchor)
-        let top = aTableView.topAnchor
+        let top = scrollView.topAnchor
             .constraint(equalTo: self.view.topAnchor)
-        let bottom = aTableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+        let bottom = scrollView.bottomAnchor
+            .constraint(equalTo: self.view.bottomAnchor)
         NSLayoutConstraint.activate(
             [leading, trailing, top, bottom])
     }
-    
-    func activateConstraintsTopImageView(){
-        topImageView.translatesAutoresizingMaskIntoConstraints = false
-        let leading = topImageView.leadingAnchor
-            .constraint(equalTo: self.view.leadingAnchor)
-        let trailing = topImageView.trailingAnchor
-            .constraint(equalTo: self.view.trailingAnchor)
-        let top = topImageView.topAnchor
-            .constraint(equalTo: self.view.topAnchor)
-        let topImageHeight = topImageView.heightAnchor.constraint(equalToConstant: CGFloat(topImageHeightValue))
-        topImageHeight.identifier = "imageheight"
-        NSLayoutConstraint.activate(
-            [leading, trailing, top, topImageHeight])
-    }
-    
-    func activateConstraintsGalleryButton(){
+
+    func activateConstraintsGalleryButton() {
         galleryButton.translatesAutoresizingMaskIntoConstraints = false
-        
+        let width = galleryButton.widthAnchor
+            .constraint(equalToConstant: 300)
+        let height = galleryButton.heightAnchor
+            .constraint(equalToConstant: 50)
+        let centerX = galleryButton.centerXAnchor
+            .constraint(equalTo: topImageView.centerXAnchor)
         let centerY = galleryButton.centerYAnchor
             .constraint(equalTo: topImageView.bottomAnchor)
-        
-        let leading = galleryButton.leadingAnchor
-            .constraint(equalTo: self.view.leadingAnchor, constant: 10)
-        let trailing = galleryButton.trailingAnchor
-            .constraint(equalTo: self.view.trailingAnchor, constant: -10)
-//        let bottom = aTableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
-        let height = galleryButton.heightAnchor.constraint(equalToConstant: 100)
         NSLayoutConstraint.activate(
-            [centerY, trailing, leading, height])
+            [width, height, centerX, centerY])
     }
-    
+
+    func activateConstraintImageContainer() {
+        imageContainer.translatesAutoresizingMaskIntoConstraints = false
+        let leading = imageContainer.leadingAnchor
+            .constraint(equalTo: self.view.leadingAnchor)
+        let trailing = imageContainer.trailingAnchor
+            .constraint(equalTo: self.view.trailingAnchor)
+        let top = imageContainer.topAnchor
+            .constraint(equalTo: scrollView.topAnchor)
+        let height = imageContainer.heightAnchor
+            .constraint(equalTo: imageContainer.widthAnchor, multiplier: 0.7)
+        NSLayoutConstraint.activate(
+            [leading, trailing, top, height])
+    }
+
+    func activateConstraintsTopImageView() {
+        topImageView.translatesAutoresizingMaskIntoConstraints = false
+        let leading = topImageView.leadingAnchor
+            .constraint(equalTo: imageContainer.leadingAnchor)
+        let trailing = topImageView.trailingAnchor
+            .constraint(equalTo: imageContainer.trailingAnchor)
+
+        let top = topImageView.topAnchor
+            .constraint(equalTo: self.view.topAnchor)
+        top.priority = .required
+        top.isActive = true
+//
+//        let initialHeight = imageView.heightAnchor
+//            .constraint(equalToConstant: 500)
+//        initialHeight.priority = .defaultHigh // was top
+//        initialHeight.isActive = true // was top
+
+        let height = topImageView.heightAnchor
+            .constraint(greaterThanOrEqualTo: imageContainer.heightAnchor, constant: -200)
+        height.priority = .required // was top
+        height.isActive = true // was top
+
+        let bottom = topImageView.bottomAnchor
+            .constraint(equalTo: imageContainer.bottomAnchor)
+//        make.height.equalTo(imageContainer.snp.width).multipliedBy(0.7)
+        NSLayoutConstraint.activate(
+            [leading, trailing, top, height, bottom])
+    }
+
+    func activateConstraintTextContainer() {
+        textContainer.translatesAutoresizingMaskIntoConstraints = false
+        let leading = textContainer.leadingAnchor
+            .constraint(equalTo: self.view.leadingAnchor)
+        let trailing = textContainer.trailingAnchor
+            .constraint(equalTo: self.view.trailingAnchor)
+        let top = textContainer.topAnchor
+            .constraint(equalTo: imageContainer.bottomAnchor)
+        let bottom = textContainer.bottomAnchor
+            .constraint(equalTo: scrollView.bottomAnchor)
+//        make.height.equalTo(imageContainer.snp.width).multipliedBy(0.7)
+        NSLayoutConstraint.activate(
+            [leading, trailing, top, bottom])
+    }
+
+
+    func activateConstraintTextContent() {
+        textContent.translatesAutoresizingMaskIntoConstraints = false
+        let leading = textContent.leadingAnchor
+            .constraint(equalTo: textContainer.leadingAnchor, constant: 20)
+        let trailing = textContent.trailingAnchor
+            .constraint(equalTo: textContainer.trailingAnchor, constant: -20)
+        let top = textContent.topAnchor
+            .constraint(equalTo: textContainer.topAnchor, constant: 50)
+        let height = textContent.heightAnchor
+            .constraint(equalToConstant: 900)
+        let bottom = textContent.bottomAnchor
+            .constraint(equalTo: textContainer.bottomAnchor, constant: -50)
+        NSLayoutConstraint.activate(
+            [leading, trailing, top, bottom, height])
+    }
+
+
+
 }
 
-extension ViewController: UITableViewDataSource, UITableViewDelegate {
-
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-
-        return 11
-    }
-
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-
-        var cell: UITableViewCell
-        
-        cell = tableViewCell()
-
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 200
-    }
-
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-       
-    }
-
-    func styleCell(forIndexPath indexPath: IndexPath, cell: UITableViewCell?) {
-       
-    }
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let y = initialTopImageHeightValue - (Int(scrollView.contentOffset.y) + initialTopImageHeightValue)
-        let height = min(max(y, 60), 350)
-        
-        for constraint in self.topImageView.constraints {
-            if constraint.identifier == "imageheight" {
-                constraint.constant = CGFloat(height)
-            }
-        }
-        self.view.layoutIfNeeded()
-    }
-    
-}
